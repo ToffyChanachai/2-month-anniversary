@@ -196,8 +196,10 @@
 
     /* ---------- Reward (win) sequence ---------- */
     #reward {
-      --lw: min(88vw, 380px);          /* letter width  */
-      --lh: min(80dvh, 560px);         /* letter height (unfolded) */
+      --lw: min(88vw, 380px);
+      /* letter width  */
+      --lh: min(80dvh, 560px);
+      /* letter height (unfolded) */
       position: fixed;
       inset: 0;
       z-index: 100000;
@@ -388,7 +390,8 @@
 
     /* rolled scroll: the top rod stays put, the roll travels down as it opens */
     .letter-wrap {
-      --r: 36px;                                   /* rod thickness */
+      --r: 36px;
+      /* rod thickness */
       position: absolute;
       left: 50%;
       top: calc(50% - var(--lh) / 2);
@@ -688,7 +691,7 @@
 
 <body>
   <div class="toolbar">
-    <h1>🧩 กระดานจิ๊กซอว์</h1>
+    <h1>กระดานจิ๊กซอว์</h1>
     <button id="shuffle" class="primary">🔄 รีเซ็ต</button>
     <div class="stats">
       <span id="count">0/0</span>
@@ -712,7 +715,7 @@
             <h2 class="r-title"></h2>
             <img class="r-img" alt="">
             <p class="r-msg"></p>
-            <button class="again">🔄 เล่นอีกครั้ง</button>
+            <button class="again">ปิด</button>
           </div>
         </div>
         <div class="rod rod-top"></div>
@@ -720,10 +723,12 @@
           <div class="rod"></div>
           <div class="roll-paper"></div>
         </div>
-        <div class="tie"><div class="seal">♥</div></div>
+        <div class="tie">
+          <div class="seal">♥</div>
+        </div>
       </div>
     </div>
-    <div class="tap-hint">👆 แตะเพื่อเปิดม้วนกระดาษ</div>
+    <div class="tap-hint">👆 แตะเพื่อเปิด</div>
     <canvas id="confetti"></canvas>
   </div>
 
@@ -733,7 +738,7 @@
 
     // ===== Reward paper: edit the text and picture here =====
     const REWARD = {
-      title: '🎉 ยินดีด้วย!',
+      title: '🎉 HAPPY 2 MONTHS ANNIVERSARY !',
       image: 'img/test1.jpg',
       message: 'คุณต่อจิ๊กซอว์สำเร็จแล้ว\nนี่คือรางวัลของคุณ\nขอให้มีความสุขมากๆ นะ',
     };
