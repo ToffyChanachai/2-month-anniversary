@@ -225,31 +225,52 @@
       z-index: 10;
     }
 
-    /* rotating light rays behind the gift/letter */
-    .rays {
+    /* hearts floating up behind the gift/scroll */
+    .hearts {
       position: absolute;
-      left: 50%;
-      top: 46%;
-      width: 760px;
-      height: 760px;
-      margin: -380px 0 0 -380px;
-      background: repeating-conic-gradient(rgba(255, 215, 90, 0.35) 0 9deg, transparent 9deg 18deg);
-      -webkit-mask: radial-gradient(circle, #000 0 15%, transparent 62%);
-      mask: radial-gradient(circle, #000 0 15%, transparent 62%);
+      inset: 0;
+      pointer-events: none;
       opacity: 0;
-      transform: scale(0.3);
-      transition: opacity 0.6s, transform 0.9s;
-      animation: spin 14s linear infinite;
+      transition: opacity 0.8s;
     }
 
-    #reward.open .rays {
+    #reward.open .hearts {
       opacity: 1;
-      transform: scale(1);
     }
 
-    @keyframes spin {
-      to {
-        rotate: 360deg;
+    .hearts span {
+      position: absolute;
+      bottom: -60px;
+      line-height: 1;
+      animation: floatUp linear infinite;
+      animation-play-state: paused;
+    }
+
+    #reward.open .hearts span {
+      animation-play-state: running;
+    }
+
+    @keyframes floatUp {
+      0% {
+        transform: translate(0, 0) rotate(-10deg) scale(0.6);
+        opacity: 0;
+      }
+
+      10% {
+        opacity: 0.9;
+      }
+
+      50% {
+        transform: translate(var(--sway), -55dvh) rotate(10deg) scale(1);
+      }
+
+      90% {
+        opacity: 0.8;
+      }
+
+      100% {
+        transform: translate(0, -115dvh) rotate(-10deg) scale(0.9);
+        opacity: 0;
       }
     }
 
@@ -365,22 +386,25 @@
       }
     }
 
-    /* folded letter */
+    /* rolled scroll: the top rod stays put, the roll travels down as it opens */
     .letter-wrap {
+      --r: 36px;                                   /* rod thickness */
       position: absolute;
       left: 50%;
-      top: 46%;
+      top: calc(50% - var(--lh) / 2);
       width: var(--lw);
       height: var(--lh);
-      transform: translate(-50%, -50%) translateY(16dvh) scale(0.12);
+      transform-origin: 50% 0;
+      /* starts small, inside the gift box */
+      transform: translateX(-50%) translateY(calc(12dvh + var(--lh) / 2)) scale(0.12);
       opacity: 0;
-      transition: transform 1s cubic-bezier(0.2, 0.9, 0.3, 1.1), opacity 0.4s, top 0.8s;
+      transition: transform 1s cubic-bezier(0.2, 0.9, 0.3, 1.1), opacity 0.4s;
       z-index: 3;
       pointer-events: none;
     }
 
     #reward.open .letter-wrap {
-      transform: translate(-50%, -50%) scale(1);
+      transform: translateX(-50%) scale(1);
       opacity: 1;
       transition-delay: 0.3s;
       pointer-events: auto;
@@ -388,20 +412,18 @@
     }
 
     #reward.unfolded .letter-wrap {
-      top: 50%;
       cursor: default;
-      transition-delay: 0s;
     }
 
-    .letter {
+    .scroll {
       position: relative;
       width: 100%;
       height: 100%;
       animation: bob 2.4s ease-in-out infinite;
-      filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.45));
+      filter: drop-shadow(0 12px 16px rgba(0, 0, 0, 0.45));
     }
 
-    #reward.unfolded .letter {
+    #reward.unfolded .scroll {
       animation: none;
     }
 
@@ -411,105 +433,142 @@
       }
     }
 
-    .panel {
+    /* wooden rod with golden knobs */
+    .rod {
       position: absolute;
       left: 0;
-      width: 100%;
-      height: calc(100% / 3);
-      transform-style: preserve-3d;
-      transition: transform 0.85s cubic-bezier(0.45, 0.05, 0.2, 1);
+      right: 0;
+      height: var(--r);
+      border-radius: calc(var(--r) / 2);
+      background: linear-gradient(#a8662f, #e3a86a 30%, #8a4f22 70%, #5a3012);
     }
 
-    .p-top {
-      top: 0;
-      z-index: 3;
-      transform-origin: 50% 100%;
-      transform: perspective(1400px) rotateX(-180deg);
-    }
-
-    .p-mid {
-      top: calc(100% / 3);
-      z-index: 1;
-    }
-
-    .p-bot {
-      top: calc(200% / 3);
-      z-index: 2;
-      transform-origin: 50% 0;
-      transform: perspective(1400px) rotateX(180deg);
-    }
-
-    #reward.unfolded .p-top {
-      transform: perspective(1400px) rotateX(0deg);
-    }
-
-    #reward.unfolded .p-bot {
-      transform: perspective(1400px) rotateX(0deg);
-      transition-delay: 0.65s;
-    }
-
-    .face {
+    .rod::before,
+    .rod::after {
+      content: "";
       position: absolute;
-      inset: 0;
-      overflow: hidden;
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
-      background:
-        repeating-linear-gradient(0deg, transparent 0 27px, rgba(139, 26, 26, 0.06) 27px 28px),
-        linear-gradient(135deg, #fffaf0, #f6ead2);
+      top: 50%;
+      width: calc(var(--r) * 0.95);
+      height: calc(var(--r) * 0.95);
+      margin-top: calc(var(--r) * -0.475);
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #fff0b0, #d39b2e 55%, #7a5210);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
     }
 
-    .face.back {
-      transform: rotateX(180deg);
-      background: linear-gradient(135deg, #f3e3c3, #e6d0a6);
+    .rod::before {
+      left: calc(var(--r) * -0.45);
+    }
+
+    .rod::after {
+      right: calc(var(--r) * -0.45);
+    }
+
+    .rod-top {
+      top: 0;
+      z-index: 4;
+    }
+
+    /* the rolled-up paper around the bottom rod */
+    .roll {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: calc(var(--r) * 0.7);
+      height: calc(var(--r) * 1.15);
+      z-index: 5;
+      transition: transform 1.6s cubic-bezier(0.45, 0.05, 0.25, 1);
+    }
+
+    .roll .rod {
+      top: calc(var(--r) * 0.075);
+    }
+
+    .roll-paper {
+      position: absolute;
+      left: 5%;
+      right: 5%;
+      top: 0;
+      bottom: 0;
+      border-radius: calc(var(--r) * 0.3);
+      background: linear-gradient(#cbb07a, #fffaf0 35%, #e6d3a8 70%, #a98b55);
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    #reward.unfolded .roll {
+      transform: translateY(calc(var(--lh) - 1.775 * var(--r)));
+      transition-delay: 0.35s;
+    }
+
+    /* the paper sheet, revealed from the top down */
+    .paper {
+      position: absolute;
+      left: 5%;
+      right: 5%;
+      top: calc(var(--r) / 2);
+      bottom: calc(var(--r) / 2);
+      z-index: 2;
+      overflow: hidden;
+      background:
+        radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(150, 100, 40, 0.18)),
+        repeating-linear-gradient(0deg, transparent 0 27px, rgba(139, 26, 26, 0.05) 27px 28px),
+        linear-gradient(135deg, #fffaf0, #f3e4c4);
+      clip-path: inset(0 0 100% 0);
+      transition: clip-path 1.6s cubic-bezier(0.45, 0.05, 0.25, 1);
+    }
+
+    #reward.unfolded .paper {
+      clip-path: inset(0 0 0 0);
+      transition-delay: 0.35s;
+    }
+
+    /* ribbon + wax seal holding the roll closed */
+    .tie {
+      position: absolute;
+      left: 50%;
+      top: calc(var(--r) * 0.15);
+      width: 26px;
+      height: calc(var(--r) * 1.85);
+      transform: translateX(-50%);
+      background: linear-gradient(90deg, #8f1d14, #d63a2c, #8f1d14);
+      border-radius: 3px;
+      z-index: 6;
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: opacity 0.35s, transform 0.35s;
     }
 
-    /* crease shading */
-    .p-top .front {
-      box-shadow: inset 0 -10px 12px -10px rgba(0, 0, 0, 0.25);
-    }
-
-    .p-bot .front {
-      box-shadow: inset 0 10px 12px -10px rgba(0, 0, 0, 0.25);
+    #reward.unfolded .tie {
+      opacity: 0;
+      transform: translateX(-50%) scale(1.4);
     }
 
     .seal {
-      width: 58px;
-      height: 58px;
+      width: 46px;
+      height: 46px;
+      flex: none;
       border-radius: 50%;
       background: radial-gradient(circle at 35% 35%, #d9473a, #8b1a1a 70%);
       box-shadow: 0 3px 6px rgba(0, 0, 0, 0.35), inset 0 -3px 6px rgba(0, 0, 0, 0.3);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 26px;
+      font-size: 22px;
       color: #ffd9a0;
     }
 
-    /* the full letter content; each panel shows one third of it */
     .content {
-      position: absolute;
-      left: 0;
-      width: 100%;
-      height: 300%;
-      padding: 7% 8%;
+      position: relative;
+      height: 100%;
+      padding: calc(var(--r) * 0.6) 8% calc(var(--r) * 0.9);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
+      gap: 6px;
       text-align: center;
       color: #4a1a10;
-    }
-
-    .p-mid .content {
-      top: -100%;
-    }
-
-    .p-bot .content {
-      top: -200%;
     }
 
     .content h2 {
@@ -519,7 +578,8 @@
 
     .content img {
       width: 100%;
-      height: 40%;
+      height: 42%;
+      min-height: 0;
       object-fit: cover;
       border: 6px solid #fff;
       border-radius: 4px;
@@ -548,7 +608,7 @@
     .tap-hint {
       position: absolute;
       left: 50%;
-      top: calc(46% + var(--lh) / 6 + 22px);
+      top: calc(50% - var(--lh) / 2 + 36px * 2 + 18px);
       transform: translateX(-50%);
       color: #fff;
       font-weight: 600;
@@ -640,39 +700,32 @@
   </div>
 
   <div id="reward">
-    <div class="rays"></div>
+    <div class="hearts" id="hearts"></div>
     <div class="gift" id="gift">
       <div class="gift-body"></div>
       <div class="gift-lid"><span class="bow">🎀</span></div>
     </div>
     <div class="letter-wrap" id="letterWrap">
-      <div class="letter">
-        <div class="panel p-top">
-          <div class="face front"></div>
-          <div class="face back"><div class="seal">★</div></div>
+      <div class="scroll">
+        <div class="paper">
+          <div class="content">
+            <h2 class="r-title"></h2>
+            <img class="r-img" alt="">
+            <p class="r-msg"></p>
+            <button class="again">🔄 เล่นอีกครั้ง</button>
+          </div>
         </div>
-        <div class="panel p-mid">
-          <div class="face front"></div>
+        <div class="rod rod-top"></div>
+        <div class="roll">
+          <div class="rod"></div>
+          <div class="roll-paper"></div>
         </div>
-        <div class="panel p-bot">
-          <div class="face front"></div>
-          <div class="face back"></div>
-        </div>
+        <div class="tie"><div class="seal">♥</div></div>
       </div>
     </div>
-    <div class="tap-hint">👆 แตะเพื่อเปิดกระดาษ</div>
+    <div class="tap-hint">👆 แตะเพื่อเปิดม้วนกระดาษ</div>
     <canvas id="confetti"></canvas>
   </div>
-
-  <!-- what is written on the reward paper (copied onto each fold) -->
-  <template id="letterContent">
-    <div class="content">
-      <h2 class="r-title"></h2>
-      <img class="r-img" alt="">
-      <p class="r-msg"></p>
-      <button class="again">🔄 เล่นอีกครั้ง</button>
-    </div>
-  </template>
 
   <script>
     const IMAGE_SRC = 'img/test1.jpg';
@@ -682,7 +735,7 @@
     const REWARD = {
       title: '🎉 ยินดีด้วย!',
       image: 'img/test1.jpg',
-      message: 'คุณต่อจิ๊กซอว์สำเร็จแล้ว\nนี่คือรางวัลของคุณ ขอให้มีความสุขมากๆ นะ',
+      message: 'คุณต่อจิ๊กซอว์สำเร็จแล้ว\nนี่คือรางวัลของคุณ\nขอให้มีความสุขมากๆ นะ',
     };
     let ASPECT = 4 / 3;     // replaced by the real image ratio once loaded
     const stage = document.getElementById('stage');
@@ -888,14 +941,10 @@
     // ---------- Reward sequence ----------
     let rewardTimers = [];
 
-    // put the same content on every fold; each fold shows its own third
-    document.querySelectorAll('.letter .front').forEach(face => {
-      const node = document.getElementById('letterContent').content.cloneNode(true);
-      node.querySelector('.r-title').textContent = REWARD.title;
-      node.querySelector('.r-img').src = REWARD.image;
-      node.querySelector('.r-msg').textContent = REWARD.message;
-      face.appendChild(node);
-    });
+    // fill the scroll with the reward text and picture
+    letterWrap.querySelector('.r-title').textContent = REWARD.title;
+    letterWrap.querySelector('.r-img').src = REWARD.image;
+    letterWrap.querySelector('.r-msg').textContent = REWARD.message;
 
     function showReward() {
       rewardEl.classList.add('show');
@@ -923,15 +972,40 @@
       rewardTimers.push(setTimeout(() => {
         burst(innerWidth * 0.2, innerHeight * 0.3, 70);
         burst(innerWidth * 0.8, innerHeight * 0.3, 70);
-      }, 1400));
+      }, 1900));
     });
 
     // ---------- Confetti ----------
     const cCanvas = document.getElementById('confetti');
     const cCtx = cCanvas.getContext('2d');
     const confetti = [];
-    const C_COLORS = ['#ffd75a', '#ff5a5a', '#ffffff', '#ff9ad5', '#6fe3a0', '#6ab8ff', '#ffa94d'];
+    const C_COLORS = ['#ff2d55', '#ff5a7a', '#ff8fab', '#ffb3c6', '#ffffff', '#e0115f', '#ff6f91'];
     let cRunning = false;
+
+    // background hearts: created once, they only move while the reward is open
+    (function makeHearts() {
+      const box = document.getElementById('hearts');
+      for (let i = 0; i < 22; i++) {
+        const s = document.createElement('span');
+        s.textContent = '♥';
+        s.style.left = (Math.random() * 100) + '%';
+        s.style.fontSize = (18 + Math.random() * 34) + 'px';
+        s.style.color = C_COLORS[i % 6];
+        s.style.setProperty('--sway', ((Math.random() - 0.5) * 80) + 'px');
+        s.style.animationDuration = (6 + Math.random() * 6) + 's';
+        s.style.animationDelay = (-Math.random() * 12) + 's';
+        box.appendChild(s);
+      }
+    })();
+
+    function heartPath(ctx, size) {
+      const s = size / 2;
+      ctx.beginPath();
+      ctx.moveTo(0, s * 0.7);
+      ctx.bezierCurveTo(-s * 1.2, -s * 0.1, -s * 0.6, -s * 1.1, 0, -s * 0.45);
+      ctx.bezierCurveTo(s * 0.6, -s * 1.1, s * 1.2, -s * 0.1, 0, s * 0.7);
+      ctx.closePath();
+    }
 
     function burst(x, y, count) {
       for (let i = 0; i < count; i++) {
@@ -939,10 +1013,10 @@
         const v = 6 + Math.random() * 10;
         confetti.push({
           x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v,
-          w: 6 + Math.random() * 6, h: 8 + Math.random() * 8,
-          rot: Math.random() * 6, vr: (Math.random() - 0.5) * 0.4,
+          size: 12 + Math.random() * 14,
+          rot: (Math.random() - 0.5) * 0.8, vr: (Math.random() - 0.5) * 0.06,
           color: C_COLORS[(Math.random() * C_COLORS.length) | 0],
-          round: Math.random() < 0.3, life: 0,
+          life: 0,
         });
       }
       if (!cRunning) { cRunning = true; requestAnimationFrame(tickConfetti); }
@@ -969,10 +1043,10 @@
         cCtx.save();
         cCtx.translate(p.x, p.y);
         cCtx.rotate(p.rot);
-        cCtx.scale(1, Math.cos(p.life / 6));  // flutter
+        cCtx.scale(Math.cos(p.life / 10), 1);  // gentle flip while falling
         cCtx.fillStyle = p.color;
-        if (p.round) { cCtx.beginPath(); cCtx.arc(0, 0, p.w / 2, 0, Math.PI * 2); cCtx.fill(); }
-        else cCtx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        heartPath(cCtx, p.size);
+        cCtx.fill();
         cCtx.restore();
       }
       if (confetti.length) requestAnimationFrame(tickConfetti);
