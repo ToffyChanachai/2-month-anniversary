@@ -288,9 +288,7 @@
     <h1>🧩 กระดานจิ๊กซอว์</h1>
     <button id="shuffle" class="primary">🔄 รีเซ็ต</button>
     <div class="stats">
-      <span id="count">0/0</span>
-      <span id="timer">00:00</span>
-    </div>
+      <span id="count">0/0</span>    </div>
   </div>
 
   <div id="stage">
@@ -307,13 +305,12 @@
 
   <script>
     const IMAGE_SRC = 'img/test1.jpg';
-    const N = 4;            // pieces per side (4 x 4)
+    const N = 3;            // pieces per side (3 x 3)
     let ASPECT = 4 / 3;     // replaced by the real image ratio once loaded
     const stage = document.getElementById('stage');
     const board = document.getElementById('board');
     const hint = document.getElementById('hint');
     const countEl = document.getElementById('count');
-    const timerEl = document.getElementById('timer');
     const winEl = document.getElementById('win');
     const hitCtx = document.createElement('canvas').getContext('2d');
 
@@ -323,7 +320,6 @@
     let geo = null;
     let zTop = 10;
     let moves = 0;
-    let startTime = 0, timerId = null;
     let drag = null;
 
     // ---------- Piece shape ----------
@@ -497,16 +493,6 @@
       geo = null;
       applyLayout(); // no previous geo -> scatters pieces
       updateCount();
-
-      clearInterval(timerId);
-      startTime = Date.now();
-      timerEl.textContent = '00:00';
-      timerId = setInterval(() => timerEl.textContent = fmt(Date.now() - startTime), 1000);
-    }
-
-    function fmt(ms) {
-      const s = Math.floor(ms / 1000);
-      return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
     }
 
     function updateCount() {
@@ -516,10 +502,8 @@
     }
 
     function win() {
-      clearInterval(timerId);
-      const t = fmt(Date.now() - startTime);
       hint.classList.add('done');
-      document.getElementById('winText').textContent = `ต่อ ${pieces.length} ชิ้นเสร็จในเวลา ${t} (${moves} ครั้ง)`;
+      document.getElementById('winText').textContent = `ต่อครบ ${pieces.length} ชิ้น (${moves} ครั้ง)`;
       setTimeout(() => winEl.classList.add('show'), 900);
     }
 
