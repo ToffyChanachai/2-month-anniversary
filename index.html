@@ -3,7 +3,8 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#8b1a1a">
@@ -75,12 +76,14 @@
     .toolbar {
       margin: 12px 16px 0;
       padding: 10px 16px;
-      background: rgba(255, 255, 255, 0.92);
+      background: rgba(200, 0, 0, 0.92);
+      border: 3px solid rgb(180, 0, 0);
       border-radius: 14px;
       box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
       display: flex;
       flex-wrap: wrap;
       align-items: center;
+      color: #fff;
       gap: 10px 14px;
     }
 
@@ -191,48 +194,388 @@
       }
     }
 
-    /* ---------- Win dialog ---------- */
-    #win {
+    /* ---------- Reward (win) sequence ---------- */
+    #reward {
+      --lw: min(88vw, 380px);          /* letter width  */
+      --lh: min(80dvh, 560px);         /* letter height (unfolded) */
       position: fixed;
       inset: 0;
+      z-index: 100000;
       display: none;
+      overflow: hidden;
+      opacity: 0;
+      transition: opacity 0.4s;
+      background: radial-gradient(circle at 50% 45%, rgba(70, 10, 10, 0.55), rgba(0, 0, 0, 0.85));
+    }
+
+    #reward.show {
+      display: block;
+    }
+
+    #reward.visible {
+      opacity: 1;
+    }
+
+    #confetti {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* rotating light rays behind the gift/letter */
+    .rays {
+      position: absolute;
+      left: 50%;
+      top: 46%;
+      width: 760px;
+      height: 760px;
+      margin: -380px 0 0 -380px;
+      background: repeating-conic-gradient(rgba(255, 215, 90, 0.35) 0 9deg, transparent 9deg 18deg);
+      -webkit-mask: radial-gradient(circle, #000 0 15%, transparent 62%);
+      mask: radial-gradient(circle, #000 0 15%, transparent 62%);
+      opacity: 0;
+      transform: scale(0.3);
+      transition: opacity 0.6s, transform 0.9s;
+      animation: spin 14s linear infinite;
+    }
+
+    #reward.open .rays {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    @keyframes spin {
+      to {
+        rotate: 360deg;
+      }
+    }
+
+    /* gift box */
+    .gift {
+      position: absolute;
+      left: 50%;
+      top: 62%;
+      width: 150px;
+      height: 130px;
+      transform: translate(-50%, -50%);
+      transition: opacity 0.5s, top 0.6s;
+      z-index: 2;
+    }
+
+    #reward.show .gift {
+      animation: giftDrop 0.8s cubic-bezier(0.2, 0.9, 0.3, 1.2) both, giftShake 0.45s 0.95s 2 ease-in-out;
+    }
+
+    #reward.unfolded .gift {
+      opacity: 0;
+      top: 80%;
+    }
+
+    .gift-body {
+      position: absolute;
+      bottom: 0;
+      left: 10px;
+      right: 10px;
+      height: 92px;
+      border-radius: 6px;
+      background: linear-gradient(#f7cd4d, #dfa516);
+      box-shadow: inset 0 -12px 0 rgba(0, 0, 0, 0.12), 0 14px 26px rgba(0, 0, 0, 0.45);
+    }
+
+    .gift-lid {
+      position: absolute;
+      top: 14px;
+      left: 0;
+      right: 0;
+      height: 32px;
+      border-radius: 6px;
+      background: linear-gradient(#ffdc66, #ebb52c);
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .gift-body::before,
+    .gift-lid::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 24px;
+      transform: translateX(-50%);
+      background: linear-gradient(90deg, #a8251a, #d63a2c, #a8251a);
+    }
+
+    .bow {
+      position: absolute;
+      left: 50%;
+      top: -40px;
+      transform: translateX(-50%);
+      font-size: 54px;
+      line-height: 1;
+      filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.3));
+    }
+
+    #reward.open .gift-lid {
+      animation: lidOff 0.75s ease-out forwards;
+    }
+
+    @keyframes giftDrop {
+      0% {
+        transform: translate(-50%, -260%) scale(0.6);
+        opacity: 0;
+      }
+
+      60% {
+        transform: translate(-50%, -50%) scale(1.06, 0.94);
+        opacity: 1;
+      }
+
+      78% {
+        transform: translate(-50%, -58%) scale(0.97, 1.03);
+      }
+
+      100% {
+        transform: translate(-50%, -50%) scale(1);
+      }
+    }
+
+    @keyframes giftShake {
+
+      0%,
+      100% {
+        rotate: 0deg;
+      }
+
+      25% {
+        rotate: -9deg;
+      }
+
+      75% {
+        rotate: 9deg;
+      }
+    }
+
+    @keyframes lidOff {
+      to {
+        transform: translate(90px, -200px) rotate(40deg);
+        opacity: 0;
+      }
+    }
+
+    /* folded letter */
+    .letter-wrap {
+      position: absolute;
+      left: 50%;
+      top: 46%;
+      width: var(--lw);
+      height: var(--lh);
+      transform: translate(-50%, -50%) translateY(16dvh) scale(0.12);
+      opacity: 0;
+      transition: transform 1s cubic-bezier(0.2, 0.9, 0.3, 1.1), opacity 0.4s, top 0.8s;
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    #reward.open .letter-wrap {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+      transition-delay: 0.3s;
+      pointer-events: auto;
+      cursor: pointer;
+    }
+
+    #reward.unfolded .letter-wrap {
+      top: 50%;
+      cursor: default;
+      transition-delay: 0s;
+    }
+
+    .letter {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      animation: bob 2.4s ease-in-out infinite;
+      filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.45));
+    }
+
+    #reward.unfolded .letter {
+      animation: none;
+    }
+
+    @keyframes bob {
+      50% {
+        translate: 0 -10px;
+      }
+    }
+
+    .panel {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: calc(100% / 3);
+      transform-style: preserve-3d;
+      transition: transform 0.85s cubic-bezier(0.45, 0.05, 0.2, 1);
+    }
+
+    .p-top {
+      top: 0;
+      z-index: 3;
+      transform-origin: 50% 100%;
+      transform: perspective(1400px) rotateX(-180deg);
+    }
+
+    .p-mid {
+      top: calc(100% / 3);
+      z-index: 1;
+    }
+
+    .p-bot {
+      top: calc(200% / 3);
+      z-index: 2;
+      transform-origin: 50% 0;
+      transform: perspective(1400px) rotateX(180deg);
+    }
+
+    #reward.unfolded .p-top {
+      transform: perspective(1400px) rotateX(0deg);
+    }
+
+    #reward.unfolded .p-bot {
+      transform: perspective(1400px) rotateX(0deg);
+      transition-delay: 0.65s;
+    }
+
+    .face {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      background:
+        repeating-linear-gradient(0deg, transparent 0 27px, rgba(139, 26, 26, 0.06) 27px 28px),
+        linear-gradient(135deg, #fffaf0, #f6ead2);
+    }
+
+    .face.back {
+      transform: rotateX(180deg);
+      background: linear-gradient(135deg, #f3e3c3, #e6d0a6);
+      display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(0, 0, 0, 0.45);
-      z-index: 100000;
     }
 
-    #win.show {
+    /* crease shading */
+    .p-top .front {
+      box-shadow: inset 0 -10px 12px -10px rgba(0, 0, 0, 0.25);
+    }
+
+    .p-bot .front {
+      box-shadow: inset 0 10px 12px -10px rgba(0, 0, 0, 0.25);
+    }
+
+    .seal {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #d9473a, #8b1a1a 70%);
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.35), inset 0 -3px 6px rgba(0, 0, 0, 0.3);
       display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      color: #ffd9a0;
     }
 
-    #win .box {
-      background: #fff;
-      padding: 2rem 2.5rem;
-      border-radius: 16px;
+    /* the full letter content; each panel shows one third of it */
+    .content {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 300%;
+      padding: 7% 8%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
       text-align: center;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-      max-width: 90%;
+      color: #4a1a10;
     }
 
-    #win h2 {
-      font-size: 1.8rem;
-      margin-bottom: 0.5rem;
+    .p-mid .content {
+      top: -100%;
     }
 
-    #win p {
-      margin-bottom: 1.2rem;
-      opacity: 0.8;
+    .p-bot .content {
+      top: -200%;
     }
 
-    #win button {
+    .content h2 {
+      font-size: clamp(1.2rem, 4.2dvh, 1.9rem);
+      color: #8b1a1a;
+    }
+
+    .content img {
+      width: 100%;
+      height: 40%;
+      object-fit: cover;
+      border: 6px solid #fff;
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      rotate: -2deg;
+    }
+
+    .content p {
+      font-size: clamp(0.85rem, 2.4dvh, 1.05rem);
+      line-height: 1.5;
+      white-space: pre-line;
+    }
+
+    .content .again {
       font: inherit;
-      padding: 8px 20px;
-      border-radius: 8px;
+      font-size: clamp(0.85rem, 2.3dvh, 1rem);
+      padding: 8px 22px;
+      border-radius: 999px;
       border: none;
       background: #8b1a1a;
       color: #fff;
       cursor: pointer;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .tap-hint {
+      position: absolute;
+      left: 50%;
+      top: calc(46% + var(--lh) / 6 + 22px);
+      transform: translateX(-50%);
+      color: #fff;
+      font-weight: 600;
+      white-space: nowrap;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+      opacity: 0;
+      transition: opacity 0.4s;
+      z-index: 4;
+      pointer-events: none;
+    }
+
+    #reward.open .tap-hint {
+      opacity: 1;
+      transition-delay: 1.2s;
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+
+    #reward.unfolded .tap-hint {
+      opacity: 0;
+      transition-delay: 0s;
+      animation: none;
+    }
+
+    @keyframes pulse {
+      50% {
+        scale: 1.08;
+      }
     }
 
     @media (max-width: 600px) {
@@ -288,30 +631,66 @@
     <h1>🧩 กระดานจิ๊กซอว์</h1>
     <button id="shuffle" class="primary">🔄 รีเซ็ต</button>
     <div class="stats">
-      <span id="count">0/0</span>    </div>
+      <span id="count">0/0</span>
+    </div>
   </div>
 
   <div id="stage">
     <div id="board"><canvas id="hint"></canvas></div>
   </div>
 
-  <div id="win">
-    <div class="box">
-      <h2>🎉 สำเร็จ!</h2>
-      <p id="winText"></p>
-      <button id="again">เล่นอีกครั้ง</button>
+  <div id="reward">
+    <div class="rays"></div>
+    <div class="gift" id="gift">
+      <div class="gift-body"></div>
+      <div class="gift-lid"><span class="bow">🎀</span></div>
     </div>
+    <div class="letter-wrap" id="letterWrap">
+      <div class="letter">
+        <div class="panel p-top">
+          <div class="face front"></div>
+          <div class="face back"><div class="seal">★</div></div>
+        </div>
+        <div class="panel p-mid">
+          <div class="face front"></div>
+        </div>
+        <div class="panel p-bot">
+          <div class="face front"></div>
+          <div class="face back"></div>
+        </div>
+      </div>
+    </div>
+    <div class="tap-hint">👆 แตะเพื่อเปิดกระดาษ</div>
+    <canvas id="confetti"></canvas>
   </div>
+
+  <!-- what is written on the reward paper (copied onto each fold) -->
+  <template id="letterContent">
+    <div class="content">
+      <h2 class="r-title"></h2>
+      <img class="r-img" alt="">
+      <p class="r-msg"></p>
+      <button class="again">🔄 เล่นอีกครั้ง</button>
+    </div>
+  </template>
 
   <script>
     const IMAGE_SRC = 'img/test1.jpg';
     const N = 3;            // pieces per side (3 x 3)
+
+    // ===== Reward paper: edit the text and picture here =====
+    const REWARD = {
+      title: '🎉 ยินดีด้วย!',
+      image: 'img/test1.jpg',
+      message: 'คุณต่อจิ๊กซอว์สำเร็จแล้ว\nนี่คือรางวัลของคุณ ขอให้มีความสุขมากๆ นะ',
+    };
     let ASPECT = 4 / 3;     // replaced by the real image ratio once loaded
     const stage = document.getElementById('stage');
     const board = document.getElementById('board');
     const hint = document.getElementById('hint');
     const countEl = document.getElementById('count');
-    const winEl = document.getElementById('win');
+    const rewardEl = document.getElementById('reward');
+    const letterWrap = document.getElementById('letterWrap');
     const hitCtx = document.createElement('canvas').getContext('2d');
 
     let image = null;       // the loaded <img>
@@ -468,7 +847,7 @@
       pieces = [];
       moves = 0;
       zTop = 10;
-      winEl.classList.remove('show');
+      hideReward();
       hint.classList.remove('done');
 
       const grid = [];
@@ -502,9 +881,102 @@
     }
 
     function win() {
-      hint.classList.add('done');
-      document.getElementById('winText').textContent = `ต่อครบ ${pieces.length} ชิ้น (${moves} ครั้ง)`;
-      setTimeout(() => winEl.classList.add('show'), 900);
+      hint.classList.add('done');                 // show the finished picture first
+      rewardTimers.push(setTimeout(showReward, 1100));
+    }
+
+    // ---------- Reward sequence ----------
+    let rewardTimers = [];
+
+    // put the same content on every fold; each fold shows its own third
+    document.querySelectorAll('.letter .front').forEach(face => {
+      const node = document.getElementById('letterContent').content.cloneNode(true);
+      node.querySelector('.r-title').textContent = REWARD.title;
+      node.querySelector('.r-img').src = REWARD.image;
+      node.querySelector('.r-msg').textContent = REWARD.message;
+      face.appendChild(node);
+    });
+
+    function showReward() {
+      rewardEl.classList.add('show');
+      rewardEl.offsetWidth;                       // apply display:block before fading in
+      rewardEl.classList.add('visible');
+      // gift drops + shakes, then pops open
+      rewardTimers.push(setTimeout(() => {
+        rewardEl.classList.add('open');
+        const r = document.getElementById('gift').getBoundingClientRect();
+        burst(r.left + r.width / 2, r.top + r.height * 0.3, 170);
+      }, 1950));
+    }
+
+    function hideReward() {
+      rewardTimers.forEach(clearTimeout);
+      rewardTimers = [];
+      rewardEl.classList.remove('show', 'visible', 'open', 'unfolded');
+      confetti.length = 0;
+    }
+
+    letterWrap.addEventListener('click', e => {
+      if (e.target.closest('.again')) { newGame(); return; }
+      if (!rewardEl.classList.contains('open') || rewardEl.classList.contains('unfolded')) return;
+      rewardEl.classList.add('unfolded');
+      rewardTimers.push(setTimeout(() => {
+        burst(innerWidth * 0.2, innerHeight * 0.3, 70);
+        burst(innerWidth * 0.8, innerHeight * 0.3, 70);
+      }, 1400));
+    });
+
+    // ---------- Confetti ----------
+    const cCanvas = document.getElementById('confetti');
+    const cCtx = cCanvas.getContext('2d');
+    const confetti = [];
+    const C_COLORS = ['#ffd75a', '#ff5a5a', '#ffffff', '#ff9ad5', '#6fe3a0', '#6ab8ff', '#ffa94d'];
+    let cRunning = false;
+
+    function burst(x, y, count) {
+      for (let i = 0; i < count; i++) {
+        const a = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 1.3;
+        const v = 6 + Math.random() * 10;
+        confetti.push({
+          x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v,
+          w: 6 + Math.random() * 6, h: 8 + Math.random() * 8,
+          rot: Math.random() * 6, vr: (Math.random() - 0.5) * 0.4,
+          color: C_COLORS[(Math.random() * C_COLORS.length) | 0],
+          round: Math.random() < 0.3, life: 0,
+        });
+      }
+      if (!cRunning) { cRunning = true; requestAnimationFrame(tickConfetti); }
+    }
+
+    function tickConfetti() {
+      const dpr = window.devicePixelRatio || 1;
+      const W = innerWidth, H = innerHeight;
+      if (cCanvas.width !== Math.round(W * dpr) || cCanvas.height !== Math.round(H * dpr)) {
+        cCanvas.width = Math.round(W * dpr);
+        cCanvas.height = Math.round(H * dpr);
+      }
+      cCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      cCtx.clearRect(0, 0, W, H);
+      for (let i = confetti.length - 1; i >= 0; i--) {
+        const p = confetti[i];
+        p.vy += 0.28;                 // gravity
+        p.vx *= 0.985; p.vy *= 0.985; // air drag
+        p.x += p.vx + Math.sin(p.life / 9) * 0.6;
+        p.y += p.vy;
+        p.rot += p.vr;
+        p.life++;
+        if (p.y > H + 30) { confetti.splice(i, 1); continue; }
+        cCtx.save();
+        cCtx.translate(p.x, p.y);
+        cCtx.rotate(p.rot);
+        cCtx.scale(1, Math.cos(p.life / 6));  // flutter
+        cCtx.fillStyle = p.color;
+        if (p.round) { cCtx.beginPath(); cCtx.arc(0, 0, p.w / 2, 0, Math.PI * 2); cCtx.fill(); }
+        else cCtx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        cCtx.restore();
+      }
+      if (confetti.length) requestAnimationFrame(tickConfetti);
+      else { cRunning = false; cCtx.clearRect(0, 0, W, H); }
     }
 
     // ---------- Dragging ----------
@@ -567,7 +1039,6 @@
 
     // ---------- Controls ----------
     document.getElementById('shuffle').onclick = newGame;
-    document.getElementById('again').onclick = newGame;
 
     let resizeT;
     // fires on window resize, phone rotation and the mobile address bar showing/hiding
