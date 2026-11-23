@@ -567,15 +567,99 @@ body {
   color: #8b1a1a;
 }
 
-.content img {
+/* photo slider: swipe left/right, or use the arrows / dots */
+.r-gallery {
+  position: relative;
   width: 100%;
   height: 42%;
   min-height: 0;
-  object-fit: cover;
+  flex: none;
   border: 6px solid #fff;
   border-radius: 4px;
+  background: #fff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   rotate: -2deg;
+}
+
+.r-track {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  touch-action: pan-x;          /* the page blocks touch scrolling; allow it here */
+  overscroll-behavior-x: contain;
+}
+
+.r-track::-webkit-scrollbar {
+  display: none;
+}
+
+.r-track img {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  scroll-snap-align: center;
+  -webkit-user-drag: none;
+}
+
+.r-nav {
+  position: absolute;
+  top: 50%;
+  width: 30px;
+  height: 30px;
+  margin-top: -15px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  color: #8b1a1a;
+  font-size: 22px;
+  line-height: 28px;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.r-nav.prev {
+  left: 6px;
+}
+
+.r-nav.next {
+  right: 6px;
+}
+
+.r-dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 6px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.r-dots button {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+}
+
+.r-dots button.active {
+  background: #fff;
+  transform: scale(1.3);
+}
+
+/* one picture: no arrows or dots */
+.r-gallery.single .r-nav,
+.r-gallery.single .r-dots {
+  display: none;
 }
 
 .content p {

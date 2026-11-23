@@ -4,7 +4,10 @@ const N = 3;            // pieces per side (3 x 3)
 // ===== Reward paper: edit the text and picture here =====
 const REWARD = {
   title: '🎉 HAPPY 2 MONTHS ANNIVERSARY !',
-  image: 'img/test1.jpg',
+  // one or more pictures; with more than one the paper shows a swipeable slider
+  images: [
+    'img/test1.jpg',
+  ],
   message: 'คุณต่อจิ๊กซอว์สำเร็จแล้ว\nนี่คือรางวัลของคุณ\nขอให้มีความสุขมากๆ นะ',
 };
 let ASPECT = 4 / 3;     // replaced by the real image ratio once loaded
@@ -213,8 +216,48 @@ let rewardTimers = [];
 
 // fill the scroll with the reward text and picture
 letterWrap.querySelector('.r-title').textContent = REWARD.title;
-letterWrap.querySelector('.r-img').src = REWARD.image;
+const rTrack = letterWrap.querySelector('.r-track');
+setupGallery(REWARD.images || [REWARD.image]);
 letterWrap.querySelector('.r-msg').textContent = REWARD.message;
+
+// build the photo slider: one <img> per picture, dots + arrows when there are several
+function setupGallery(list) {
+  const gallery = letterWrap.querySelector('.r-gallery');
+  const dotsBox = letterWrap.querySelector('.r-dots');
+  rTrack.innerHTML = '';
+  dotsBox.innerHTML = '';
+  list.forEach((src, i) => {
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = '';
+    img.draggable = false;
+    rTrack.appendChild(img);
+    const dot = document.createElement('button');
+    dot.setAttribute('aria-label', 'รูปที่ ' + (i + 1));
+    dot.onclick = () => goSlide(i);
+    dotsBox.appendChild(dot);
+  });
+  gallery.classList.toggle('single', list.length < 2);
+  letterWrap.querySelector('.r-nav.prev').onclick = () => goSlide(currentSlide() - 1);
+  letterWrap.querySelector('.r-nav.next').onclick = () => goSlide(currentSlide() + 1);
+  rTrack.addEventListener('scroll', markDot, { passive: true });
+  markDot();
+}
+
+function currentSlide() {
+  return Math.round(rTrack.scrollLeft / Math.max(1, rTrack.clientWidth));
+}
+
+function goSlide(i) {
+  const count = rTrack.children.length;
+  i = (i + count) % count;                     // wrap around at both ends
+  rTrack.scrollTo({ left: i * rTrack.clientWidth, behavior: 'smooth' });
+}
+
+function markDot() {
+  const i = currentSlide();
+  letterWrap.querySelectorAll('.r-dots button').forEach((d, k) => d.classList.toggle('active', k === i));
+}
 
 function showReward() {
   rewardEl.classList.add('show');
@@ -233,6 +276,8 @@ function hideReward() {
   rewardTimers = [];
   rewardEl.classList.remove('show', 'visible', 'open', 'unfolded');
   confetti.length = 0;
+  rTrack.scrollLeft = 0;                      // next time start from the first picture
+  markDot();
 }
 
 letterWrap.addEventListener('click', e => {
