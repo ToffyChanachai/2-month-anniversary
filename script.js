@@ -6,7 +6,11 @@ const REWARD = {
   title: '🎉 HAPPY 2 MONTHS ANNIVERSARY !',
   // one or more pictures; with more than one the paper shows a swipeable slider
   images: [
-    'img/test1.jpg',
+    'img/pic1.jpg',
+    'img/pic2.jpg',
+    'img/pic3.jpg',
+    'img/pic4.jpg',
+    'img/pic5.jpg',
   ],
   message: 'คุณต่อจิ๊กซอว์สำเร็จแล้ว\nนี่คือรางวัลของคุณ\nขอให้มีความสุขมากๆ นะ',
 };
