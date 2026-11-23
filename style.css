@@ -6,7 +6,6 @@
 
 html,
 body {
-  font-family: 'Itim', cursive;
   height: 100%;
   /* follow the real visible height on mobile (address bar shows/hides) */
   height: 100dvh;
@@ -23,7 +22,7 @@ body {
 }
 
 body {
-  font-family: "Segoe UI", Tahoma, sans-serif;
+  font-family: 'Itim', "Segoe UI", Tahoma, sans-serif;
   background-color: #8b1a1a;
   /* Tartan: crossing stripes in two directions on a red base */
   background-image:

@@ -321,6 +321,7 @@ function fitTitle() {
   }
 }
 window.addEventListener('resize', fitTitle);
+document.fonts.ready.then(fitTitle);          // web font changes the text width
 
 function showReward() {
   rewardEl.classList.add('show');
