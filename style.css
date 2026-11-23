@@ -6,6 +6,7 @@
 
 html,
 body {
+  font-family: 'Itim', cursive;
   height: 100%;
   /* follow the real visible height on mobile (address bar shows/hides) */
   height: 100dvh;
@@ -93,18 +94,24 @@ body {
 }
 
 @keyframes give-bounce {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0) rotate(-6deg) scale(1);
   }
+
   20% {
     transform: translateY(-6px) rotate(6deg) scale(1.06);
   }
+
   40% {
     transform: translateY(0) rotate(-3deg) scale(0.98, 1.02);
   }
+
   60% {
     transform: translateY(-3px) rotate(4deg) scale(1.03);
   }
+
   80% {
     transform: translateY(0) rotate(-6deg) scale(1);
   }
@@ -187,15 +194,19 @@ body {
     transform: translate(0, 0) rotate(-10deg);
     opacity: 0;
   }
+
   10% {
     opacity: var(--o, 0.6);
   }
+
   50% {
     transform: translate(var(--sway, 20px), -55dvh) rotate(10deg);
   }
+
   85% {
     opacity: var(--o, 0.6);
   }
+
   100% {
     transform: translate(0, calc(-100dvh - 80px)) rotate(-10deg);
     opacity: 0;
@@ -683,7 +694,8 @@ body {
 .r-track {
   position: absolute;
   inset: 4% 0 0 0;
-  touch-action: none;           /* swipe handled in script.js */
+  touch-action: none;
+  /* swipe handled in script.js */
   cursor: grab;
 }
 
