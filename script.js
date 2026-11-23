@@ -1,4 +1,4 @@
-const IMAGE_SRC = 'img/test1.jpg';
+const IMAGE_SRC = 'img/pic1.jpg';
 const N = 3;            // pieces per side (3 x 3)
 
 // ===== Reward paper: edit the text and picture here =====
@@ -310,9 +310,22 @@ function setupSwipe() {
   };
 }
 
+// keep the paper title on one line: shrink the font until it fits the width
+function fitTitle() {
+  const h = letterWrap.querySelector('.r-title');
+  h.style.fontSize = '';                      // start from the CSS size
+  if (!h.clientWidth) return;                 // not on screen yet
+  if (h.scrollWidth > h.clientWidth) {
+    const size = parseFloat(getComputedStyle(h).fontSize);
+    h.style.fontSize = Math.floor(size * h.clientWidth / h.scrollWidth * 0.97) + 'px';
+  }
+}
+window.addEventListener('resize', fitTitle);
+
 function showReward() {
   rewardEl.classList.add('show');
   rewardEl.offsetWidth;                       // apply display:block before fading in
+  fitTitle();
   rewardEl.classList.add('visible');
   // gift drops + shakes, then pops open
   rewardTimers.push(setTimeout(() => {

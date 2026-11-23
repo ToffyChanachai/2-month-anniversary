@@ -664,6 +664,11 @@ body {
 .content h2 {
   font-size: clamp(1.2rem, 4.2dvh, 1.9rem);
   color: #8b1a1a;
+  /* always one line; script.js shrinks the font until it fits */
+  width: 100%;
+  flex: none;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 /* photo stack: current picture in front, the next 3 peek out behind it */
