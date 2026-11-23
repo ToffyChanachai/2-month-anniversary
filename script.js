@@ -221,46 +221,93 @@ let rewardTimers = [];
 // fill the scroll with the reward text and picture
 letterWrap.querySelector('.r-title').textContent = REWARD.title;
 const rTrack = letterWrap.querySelector('.r-track');
+const PEEK = 3;         // how many next pictures peek out behind the current one
+let slide = 0;          // index of the picture in front
 setupGallery(REWARD.images || [REWARD.image]);
 letterWrap.querySelector('.r-msg').textContent = REWARD.message;
 
-// build the photo slider: one <img> per picture, dots + arrows when there are several
+// photo stack: the current picture in front, the next 3 peeking out behind it
 function setupGallery(list) {
   const gallery = letterWrap.querySelector('.r-gallery');
   const dotsBox = letterWrap.querySelector('.r-dots');
   rTrack.innerHTML = '';
   dotsBox.innerHTML = '';
   list.forEach((src, i) => {
+    const card = document.createElement('div');
+    card.className = 'r-card';
     const img = document.createElement('img');
     img.src = src;
     img.alt = '';
     img.draggable = false;
-    rTrack.appendChild(img);
+    card.appendChild(img);
+    rTrack.appendChild(card);
     const dot = document.createElement('button');
     dot.setAttribute('aria-label', 'รูปที่ ' + (i + 1));
     dot.onclick = () => goSlide(i);
     dotsBox.appendChild(dot);
   });
   gallery.classList.toggle('single', list.length < 2);
-  letterWrap.querySelector('.r-nav.prev').onclick = () => goSlide(currentSlide() - 1);
-  letterWrap.querySelector('.r-nav.next').onclick = () => goSlide(currentSlide() + 1);
-  rTrack.addEventListener('scroll', markDot, { passive: true });
-  markDot();
+  letterWrap.querySelector('.r-nav.prev').onclick = () => goSlide(slide - 1);
+  letterWrap.querySelector('.r-nav.next').onclick = () => goSlide(slide + 1);
+  setupSwipe();
+  layoutStack();
 }
 
-function currentSlide() {
-  return Math.round(rTrack.scrollLeft / Math.max(1, rTrack.clientWidth));
-}
-
-function goSlide(i) {
+function goSlide(i, dir) {
   const count = rTrack.children.length;
-  i = (i + count) % count;                     // wrap around at both ends
-  rTrack.scrollTo({ left: i * rTrack.clientWidth, behavior: 'smooth' });
+  if (dir === undefined) dir = i >= slide ? 1 : -1;
+  slide = (i + count) % count;                 // wrap around at both ends
+  layoutStack(dir);
 }
 
-function markDot() {
-  const i = currentSlide();
-  letterWrap.querySelectorAll('.r-dots button').forEach((d, k) => d.classList.toggle('active', k === i));
+// place each card by its distance from the current one
+function layoutStack(dir = 1) {
+  const cards = [...rTrack.children];
+  const n = cards.length;
+  cards.forEach((card, k) => {
+    const d = (k - slide + n) % n;             // 0 = front, 1..PEEK = peeking behind
+    let t, o = 1;
+    if (d <= PEEK) {
+      t = `translate(${d * 9}%, ${-d * 3}%) scale(${1 - d * 0.07}) rotate(${-2 + d * 4}deg)`;
+    } else if (d === n - 1 && dir > 0) {
+      t = 'translate(-115%, 4%) rotate(-14deg)'; // the card just flicked away
+      o = 0;
+    } else {
+      t = `translate(${PEEK * 9}%, ${-PEEK * 3}%) scale(${1 - PEEK * 0.07}) rotate(${-2 + PEEK * 4}deg)`;
+      o = 0;                                   // waiting at the back of the stack
+    }
+    card.style.transform = t;
+    card.style.opacity = o;
+    card.style.zIndex = n - d;
+    card.classList.toggle('front', d === 0);
+  });
+  letterWrap.querySelectorAll('.r-dots button').forEach((b, k) => b.classList.toggle('active', k === slide));
+}
+
+// drag the front card left/right to change picture
+function setupSwipe() {
+  let startX = null, dx = 0, card = null;
+  rTrack.onpointerdown = e => {
+    if (rTrack.children.length < 2) return;
+    card = rTrack.children[slide];
+    startX = e.clientX;
+    dx = 0;
+    card.classList.add('dragging');
+    rTrack.setPointerCapture(e.pointerId);
+  };
+  rTrack.onpointermove = e => {
+    if (startX === null) return;
+    dx = e.clientX - startX;
+    card.style.transform = `translateX(${dx}px) rotate(${-2 + dx / 20}deg)`;
+  };
+  rTrack.onpointerup = rTrack.onpointercancel = () => {
+    if (startX === null) return;
+    startX = null;
+    card.classList.remove('dragging');
+    if (dx < -40) goSlide(slide + 1, 1);
+    else if (dx > 40) goSlide(slide - 1, -1);
+    else layoutStack();
+  };
 }
 
 function showReward() {
@@ -280,8 +327,8 @@ function hideReward() {
   rewardTimers = [];
   rewardEl.classList.remove('show', 'visible', 'open', 'unfolded');
   confetti.length = 0;
-  rTrack.scrollLeft = 0;                      // next time start from the first picture
-  markDot();
+  slide = 0;                                  // next time start from the first picture
+  layoutStack(-1);
 }
 
 letterWrap.addEventListener('click', e => {
@@ -449,3 +496,23 @@ image.onload = () => {
 };
 image.onerror = () => alert('โหลดรูป ' + IMAGE_SRC + ' ไม่ได้');
 image.src = IMAGE_SRC;
+
+// ---------- Background hearts rising from the bottom ----------
+const bgHearts = document.getElementById('bgHearts');
+function spawnBgHeart() {
+  if (document.hidden || bgHearts.childElementCount > 30) return;
+  const h = document.createElement('span');
+  const size = 12 + Math.random() * 22;
+  const dur = 7 + Math.random() * 6;
+  h.textContent = '♥';
+  h.style.left = Math.random() * 100 + '%';
+  h.style.fontSize = size + 'px';
+  h.style.animationDuration = dur + 's';
+  h.style.setProperty('--sway', (Math.random() * 60 - 30) + 'px');
+  h.style.setProperty('--o', (0.35 + Math.random() * 0.45).toFixed(2));
+  h.addEventListener('animationend', () => h.remove());
+  setTimeout(() => h.remove(), dur * 1000 + 500);   // backup if animationend never fires
+  bgHearts.appendChild(h);
+}
+for (let i = 0; i < 6; i++) setTimeout(spawnBgHeart, i * 400);
+setInterval(spawnBgHeart, 600);

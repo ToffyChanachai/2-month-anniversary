@@ -129,8 +129,52 @@ body {
 }
 
 /* ---------- Stage ---------- */
+/* background hearts floating up from the bottom (behind the game) */
+.bg-hearts {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.bg-hearts span {
+  position: absolute;
+  bottom: -40px;
+  color: #ff8fb1;
+  text-shadow: 0 0 8px rgba(255, 120, 160, 0.5);
+  animation: bg-rise linear forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes bg-rise {
+  0% {
+    transform: translate(0, 0) rotate(-10deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: var(--o, 0.6);
+  }
+  50% {
+    transform: translate(var(--sway, 20px), -55dvh) rotate(10deg);
+  }
+  85% {
+    opacity: var(--o, 0.6);
+  }
+  100% {
+    transform: translate(0, calc(-100dvh - 80px)) rotate(-10deg);
+    opacity: 0;
+  }
+}
+
+.toolbar {
+  position: relative;
+  z-index: 1;
+}
+
 #stage {
   position: relative;
+  z-index: 1;
   flex: 1;
   touch-action: none;
   overflow: hidden;
@@ -567,47 +611,57 @@ body {
   color: #8b1a1a;
 }
 
-/* photo slider: swipe left/right, or use the arrows / dots */
+/* photo stack: current picture in front, the next 3 peek out behind it */
 .r-gallery {
   position: relative;
   width: 100%;
   height: 42%;
   min-height: 0;
   flex: none;
+}
+
+.r-track {
+  position: absolute;
+  inset: 4% 0 0 0;
+  touch-action: none;           /* swipe handled in script.js */
+  cursor: grab;
+}
+
+.r-card {
+  position: absolute;
+  left: 2%;
+  top: 0;
+  width: 76%;
+  height: 92%;
   border: 6px solid #fff;
   border-radius: 4px;
   background: #fff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  rotate: -2deg;
+  transform-origin: 50% 100%;
+  transition: transform 0.45s cubic-bezier(0.3, 0.8, 0.3, 1), opacity 0.45s;
 }
 
-.r-track {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-  touch-action: pan-x;          /* the page blocks touch scrolling; allow it here */
-  overscroll-behavior-x: contain;
+.r-card.dragging {
+  transition: none;
 }
 
-.r-track::-webkit-scrollbar {
-  display: none;
-}
-
-.r-track img {
-  flex: 0 0 100%;
+.r-card img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  scroll-snap-align: center;
+  pointer-events: none;
   -webkit-user-drag: none;
+}
+
+/* one picture: centred, no stack */
+.r-gallery.single .r-card {
+  left: 12%;
 }
 
 .r-nav {
   position: absolute;
+  z-index: 50;
   top: 50%;
   width: 30px;
   height: 30px;
@@ -623,18 +677,19 @@ body {
 }
 
 .r-nav.prev {
-  left: 6px;
+  left: -4px;
 }
 
 .r-nav.next {
-  right: 6px;
+  right: -4px;
 }
 
 .r-dots {
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 6px;
+  z-index: 50;
+  left: 2%;
+  width: 76%;
+  bottom: -2px;
   display: flex;
   justify-content: center;
   gap: 6px;
