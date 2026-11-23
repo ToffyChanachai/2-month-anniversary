@@ -1,0 +1,676 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  /* follow the real visible height on mobile (address bar shows/hides) */
+  height: 100dvh;
+  overscroll-behavior: none;
+}
+
+body {
+  position: fixed;
+  inset: 0;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+body {
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  background-color: #8b1a1a;
+  /* Tartan: crossing stripes in two directions on a red base */
+  background-image:
+    repeating-linear-gradient(90deg,
+      transparent 0 46px,
+      rgba(110, 2, 2, 0.7) 46px 48px,
+      transparent 48px 120px),
+    repeating-linear-gradient(0deg,
+      transparent 0 46px,
+      rgba(110, 2, 2, 0.7) 46px 48px,
+      transparent 48px 120px),
+    repeating-linear-gradient(90deg,
+      rgba(60, 10, 10, 0.55) 0 24px,
+      transparent 24px 70px,
+      rgba(80, 10, 10, 0.45) 70px 100px,
+      transparent 100px 120px),
+    repeating-linear-gradient(0deg,
+      rgba(60, 10, 10, 0.55) 0 24px,
+      transparent 24px 70px,
+      rgba(53, 0, 0, 0.45) 70px 100px,
+      transparent 100px 120px),
+    repeating-linear-gradient(90deg,
+      transparent 0 10px,
+      rgba(0, 0, 0, 0.35) 10px 12px,
+      transparent 12px 120px),
+    repeating-linear-gradient(0deg,
+      transparent 0 10px,
+      rgba(0, 0, 0, 0.35) 10px 12px,
+      transparent 12px 120px);
+  display: flex;
+  flex-direction: column;
+  color: #3a1010;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ---------- Toolbar ---------- */
+.toolbar {
+  margin: 12px 16px 0;
+  padding: 10px 16px;
+  background: rgba(200, 0, 0, 0.92);
+  border: 3px solid rgb(180, 0, 0);
+  border-radius: 14px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  color: #fff;
+  gap: 10px 14px;
+}
+
+.toolbar h1 {
+  font-size: 1.3rem;
+  margin-right: auto;
+  white-space: nowrap;
+}
+
+.toolbar label {
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.toolbar select,
+.toolbar button,
+.upload {
+  font: inherit;
+  font-size: 0.9rem;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #c9a0a0;
+  background: #fff;
+  color: #3a1010;
+  cursor: pointer;
+}
+
+.toolbar button:hover,
+.upload:hover {
+  background: #fbeaea;
+}
+
+.toolbar button.primary {
+  background: #8b1a1a;
+  border-color: #8b1a1a;
+  color: #fff;
+}
+
+.toolbar button.primary:hover {
+  background: #a52424;
+}
+
+.upload input {
+  display: none;
+}
+
+.stats {
+  display: flex;
+  gap: 12px;
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+/* ---------- Stage ---------- */
+#stage {
+  position: relative;
+  flex: 1;
+  touch-action: none;
+  overflow: hidden;
+}
+
+#board {
+  position: absolute;
+  background: rgb(255, 170, 202);
+  border: 3px solid rgb(58, 58, 58);
+  border-radius: 4px;
+  box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.6), 0 8px 30px rgba(0, 0, 0, 0.4);
+  box-sizing: content-box;
+}
+
+#hint {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+#hint.done {
+  opacity: 1;
+  z-index: 99999;
+  transition: opacity 1s;
+}
+
+.piece {
+  position: absolute;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.55));
+  pointer-events: none;
+  transition: filter 0.15s;
+}
+
+.piece.dragging {
+  filter: drop-shadow(0 12px 14px rgba(0, 0, 0, 0.55));
+}
+
+.piece.placed {
+  filter: none;
+  animation: pop 0.25s ease-out;
+}
+
+@keyframes pop {
+  50% {
+    transform: scale(1.04);
+  }
+}
+
+/* ---------- Reward (win) sequence ---------- */
+#reward {
+  --lw: min(88vw, 380px);
+  /* letter width  */
+  --lh: min(80dvh, 560px);
+  /* letter height (unfolded) */
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: none;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.4s;
+  background: radial-gradient(circle at 50% 45%, rgba(70, 10, 10, 0.55), rgba(0, 0, 0, 0.85));
+}
+
+#reward.show {
+  display: block;
+}
+
+#reward.visible {
+  opacity: 1;
+}
+
+#confetti {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* hearts floating up behind the gift/scroll */
+.hearts {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.8s;
+}
+
+#reward.open .hearts {
+  opacity: 1;
+}
+
+.hearts span {
+  position: absolute;
+  bottom: -60px;
+  line-height: 1;
+  animation: floatUp linear infinite;
+  animation-play-state: paused;
+}
+
+#reward.open .hearts span {
+  animation-play-state: running;
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translate(0, 0) rotate(-10deg) scale(0.6);
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 0.9;
+  }
+
+  50% {
+    transform: translate(var(--sway), -55dvh) rotate(10deg) scale(1);
+  }
+
+  90% {
+    opacity: 0.8;
+  }
+
+  100% {
+    transform: translate(0, -115dvh) rotate(-10deg) scale(0.9);
+    opacity: 0;
+  }
+}
+
+/* gift box */
+.gift {
+  position: absolute;
+  left: 50%;
+  top: 62%;
+  width: 150px;
+  height: 130px;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.5s, top 0.6s;
+  z-index: 2;
+}
+
+#reward.show .gift {
+  animation: giftDrop 0.8s cubic-bezier(0.2, 0.9, 0.3, 1.2) both, giftShake 0.45s 0.95s 2 ease-in-out;
+}
+
+#reward.unfolded .gift {
+  opacity: 0;
+  top: 80%;
+}
+
+.gift-body {
+  position: absolute;
+  bottom: 0;
+  left: 10px;
+  right: 10px;
+  height: 92px;
+  border-radius: 6px;
+  background: linear-gradient(#f7cd4d, #dfa516);
+  box-shadow: inset 0 -12px 0 rgba(0, 0, 0, 0.12), 0 14px 26px rgba(0, 0, 0, 0.45);
+}
+
+.gift-lid {
+  position: absolute;
+  top: 14px;
+  left: 0;
+  right: 0;
+  height: 32px;
+  border-radius: 6px;
+  background: linear-gradient(#ffdc66, #ebb52c);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+}
+
+.gift-body::before,
+.gift-lid::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 24px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, #a8251a, #d63a2c, #a8251a);
+}
+
+.bow {
+  position: absolute;
+  left: 50%;
+  top: -40px;
+  transform: translateX(-50%);
+  font-size: 54px;
+  line-height: 1;
+  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.3));
+}
+
+#reward.open .gift-lid {
+  animation: lidOff 0.75s ease-out forwards;
+}
+
+@keyframes giftDrop {
+  0% {
+    transform: translate(-50%, -260%) scale(0.6);
+    opacity: 0;
+  }
+
+  60% {
+    transform: translate(-50%, -50%) scale(1.06, 0.94);
+    opacity: 1;
+  }
+
+  78% {
+    transform: translate(-50%, -58%) scale(0.97, 1.03);
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes giftShake {
+
+  0%,
+  100% {
+    rotate: 0deg;
+  }
+
+  25% {
+    rotate: -9deg;
+  }
+
+  75% {
+    rotate: 9deg;
+  }
+}
+
+@keyframes lidOff {
+  to {
+    transform: translate(90px, -200px) rotate(40deg);
+    opacity: 0;
+  }
+}
+
+/* rolled scroll: the top rod stays put, the roll travels down as it opens */
+.letter-wrap {
+  --r: 36px;
+  /* rod thickness */
+  position: absolute;
+  left: 50%;
+  top: calc(50% - var(--lh) / 2);
+  width: var(--lw);
+  height: var(--lh);
+  transform-origin: 50% 0;
+  /* starts small, inside the gift box */
+  transform: translateX(-50%) translateY(calc(12dvh + var(--lh) / 2)) scale(0.12);
+  opacity: 0;
+  transition: transform 1s cubic-bezier(0.2, 0.9, 0.3, 1.1), opacity 0.4s;
+  z-index: 3;
+  pointer-events: none;
+}
+
+#reward.open .letter-wrap {
+  transform: translateX(-50%) scale(1);
+  opacity: 1;
+  transition-delay: 0.3s;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+#reward.unfolded .letter-wrap {
+  cursor: default;
+}
+
+.scroll {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  animation: bob 2.4s ease-in-out infinite;
+  filter: drop-shadow(0 12px 16px rgba(0, 0, 0, 0.45));
+}
+
+#reward.unfolded .scroll {
+  animation: none;
+}
+
+@keyframes bob {
+  50% {
+    translate: 0 -10px;
+  }
+}
+
+/* wooden rod with golden knobs */
+.rod {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: var(--r);
+  border-radius: calc(var(--r) / 2);
+  background: linear-gradient(#a8662f, #e3a86a 30%, #8a4f22 70%, #5a3012);
+}
+
+.rod::before,
+.rod::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: calc(var(--r) * 0.95);
+  height: calc(var(--r) * 0.95);
+  margin-top: calc(var(--r) * -0.475);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff0b0, #d39b2e 55%, #7a5210);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
+}
+
+.rod::before {
+  left: calc(var(--r) * -0.45);
+}
+
+.rod::after {
+  right: calc(var(--r) * -0.45);
+}
+
+.rod-top {
+  top: 0;
+  z-index: 4;
+}
+
+/* the rolled-up paper around the bottom rod */
+.roll {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--r) * 0.7);
+  height: calc(var(--r) * 1.15);
+  z-index: 5;
+  transition: transform 1.6s cubic-bezier(0.45, 0.05, 0.25, 1);
+}
+
+.roll .rod {
+  top: calc(var(--r) * 0.075);
+}
+
+.roll-paper {
+  position: absolute;
+  left: 5%;
+  right: 5%;
+  top: 0;
+  bottom: 0;
+  border-radius: calc(var(--r) * 0.3);
+  background: linear-gradient(#cbb07a, #fffaf0 35%, #e6d3a8 70%, #a98b55);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+}
+
+#reward.unfolded .roll {
+  transform: translateY(calc(var(--lh) - 1.775 * var(--r)));
+  transition-delay: 0.35s;
+}
+
+/* the paper sheet, revealed from the top down */
+.paper {
+  position: absolute;
+  left: 5%;
+  right: 5%;
+  top: calc(var(--r) / 2);
+  bottom: calc(var(--r) / 2);
+  z-index: 2;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(150, 100, 40, 0.18)),
+    repeating-linear-gradient(0deg, transparent 0 27px, rgba(139, 26, 26, 0.05) 27px 28px),
+    linear-gradient(135deg, #fffaf0, #f3e4c4);
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 1.6s cubic-bezier(0.45, 0.05, 0.25, 1);
+}
+
+#reward.unfolded .paper {
+  clip-path: inset(0 0 0 0);
+  transition-delay: 0.35s;
+}
+
+/* ribbon + wax seal holding the roll closed */
+.tie {
+  position: absolute;
+  left: 50%;
+  top: calc(var(--r) * 0.15);
+  width: 26px;
+  height: calc(var(--r) * 1.85);
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, #8f1d14, #d63a2c, #8f1d14);
+  border-radius: 3px;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.35s, transform 0.35s;
+}
+
+#reward.unfolded .tie {
+  opacity: 0;
+  transform: translateX(-50%) scale(1.4);
+}
+
+.seal {
+  width: 46px;
+  height: 46px;
+  flex: none;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #d9473a, #8b1a1a 70%);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.35), inset 0 -3px 6px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  color: #ffd9a0;
+}
+
+.content {
+  position: relative;
+  height: 100%;
+  padding: calc(var(--r) * 0.6) 8% calc(var(--r) * 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  text-align: center;
+  color: #4a1a10;
+}
+
+.content h2 {
+  font-size: clamp(1.2rem, 4.2dvh, 1.9rem);
+  color: #8b1a1a;
+}
+
+.content img {
+  width: 100%;
+  height: 42%;
+  min-height: 0;
+  object-fit: cover;
+  border: 6px solid #fff;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  rotate: -2deg;
+}
+
+.content p {
+  font-size: clamp(0.85rem, 2.4dvh, 1.05rem);
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+.content .again {
+  font: inherit;
+  font-size: clamp(0.85rem, 2.3dvh, 1rem);
+  padding: 8px 22px;
+  border-radius: 999px;
+  border: none;
+  background: #8b1a1a;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+}
+
+.tap-hint {
+  position: absolute;
+  left: 50%;
+  top: calc(50% - var(--lh) / 2 + 36px * 2 + 18px);
+  transform: translateX(-50%);
+  color: #fff;
+  font-weight: 600;
+  white-space: nowrap;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  transition: opacity 0.4s;
+  z-index: 4;
+  pointer-events: none;
+}
+
+#reward.open .tap-hint {
+  opacity: 1;
+  transition-delay: 1.2s;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+#reward.unfolded .tap-hint {
+  opacity: 0;
+  transition-delay: 0s;
+  animation: none;
+}
+
+@keyframes pulse {
+  50% {
+    scale: 1.08;
+  }
+}
+
+@media (max-width: 600px) {
+  .toolbar {
+    margin: 8px 8px 0;
+    padding: 8px 10px;
+  }
+
+  .toolbar h1 {
+    font-size: 1.1rem;
+  }
+
+  .toolbar {
+    gap: 8px 10px;
+  }
+
+  .toolbar button {
+    padding: 8px 12px;
+  }
+
+  .stats {
+    gap: 8px;
+    font-size: 0.85rem;
+  }
+}
+
+/* phones held sideways: keep the toolbar thin */
+@media (max-height: 500px) {
+  .toolbar {
+    margin: 6px 8px 0;
+    padding: 4px 10px;
+  }
+
+  .toolbar h1 {
+    font-size: 1rem;
+  }
+
+  .toolbar button {
+    padding: 4px 10px;
+  }
+}
+
+@media (max-width: 360px) {
+  .toolbar h1 {
+    font-size: 0.95rem;
+  }
+}
