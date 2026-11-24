@@ -794,6 +794,31 @@ body {
   white-space: pre-line;
 }
 
+/* letter layout: "to" top-left, message in the middle, "from" bottom-right */
+.r-letter {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.content .r-to {
+  text-align: left;
+  font-weight: bold;
+  color: #8b1a1a;
+}
+
+.content .r-from {
+  text-align: right;
+  font-weight: bold;
+  color: #8b1a1a;
+}
+
+.content .r-to:empty,
+.content .r-from:empty {
+  display: none;
+}
+
 .content .again {
   font: inherit;
   font-size: clamp(0.85rem, 2.3dvh, 1rem);

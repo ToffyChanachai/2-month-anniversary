@@ -3,7 +3,7 @@ const N = 3;            // pieces per side (3 x 3)
 
 // ===== Reward paper: edit the text and picture here =====
 const REWARD = {
-  title: '🎉 HAPPY 2 MONTHS ANNIVERSARY !',
+  title: '🎉 HAPPY 2 MONTHS ANNIVERSARY!',
   // one or more pictures; with more than one the paper shows a swipeable slider
   images: [
     'img/pic1.jpg',
@@ -12,7 +12,9 @@ const REWARD = {
     'img/pic4.jpg',
     'img/pic5.jpg',
   ],
-  message: 'คุณต่อจิ๊กซอว์สำเร็จแล้ว\nนี่คือรางวัลของคุณ\nขอให้มีความสุขมากๆ นะ',
+  to: '💌 ถึง: Ploy',                // shown top-left of the message
+  message: 'เดือนที่ 2 แย้ว, ขอบคุณที่สร้างความสุขให้กันนะ รักเธอที่สุด💗',
+  from: 'จาก Toffy',                // shown bottom-right of the message
 };
 let ASPECT = 4 / 3;     // replaced by the real image ratio once loaded
 const stage = document.getElementById('stage');
@@ -224,7 +226,9 @@ const rTrack = letterWrap.querySelector('.r-track');
 const PEEK = 3;         // how many next pictures peek out behind the current one
 let slide = 0;          // index of the picture in front
 setupGallery(REWARD.images || [REWARD.image]);
+letterWrap.querySelector('.r-to').textContent = REWARD.to || '';
 letterWrap.querySelector('.r-msg').textContent = REWARD.message;
+letterWrap.querySelector('.r-from').textContent = REWARD.from || '';
 
 // photo stack: the current picture in front, the next 3 peeking out behind it
 function setupGallery(list) {
